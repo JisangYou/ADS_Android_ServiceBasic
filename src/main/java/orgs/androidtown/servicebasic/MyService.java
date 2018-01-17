@@ -18,38 +18,43 @@ public class MyService extends Service {
 
     // 컴포넌트는 바인더를 통해 서비스에 접근할 수 있다
     class CustomBinder extends Binder {
-        public CustomBinder(){
+        public CustomBinder() {
 
         }
-        public MyService getService(){
+
+        public MyService getService() {
+            // 서비스 객체를 리턴
             return MyService.this;
         }
     }
 
+    // 외부로부터 데이터를 전달하려면 바인더를 사용
+    // Binder 객체는 IBinder 인터페이스 상속구현 객체
     IBinder binder = new CustomBinder();
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d("MyService","========onBind()");
+        Log.d("MyService", "========onBind()");
         return binder;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.d("MyService","========onUnbind()");
+        Log.d("MyService", "========onUnbind()");
         return super.onUnbind(intent);
     }
 
-    public int getTotal(){
+    public int getTotal() {
         return total;
     }
 
     private int total = 0;
+
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if(intent != null){
+    public int onStartCommand(Intent intent, int flags, int startId) {// 서비스가 호출 될때 마다 실행
+        if (intent != null) {
             String action = intent.getAction();
-            switch(action){
+            switch (action) {
                 case "START":
                     setNotification("PAUSE");
                     break;
@@ -68,7 +73,7 @@ public class MyService extends Service {
     // 포어그라운드 서비스 번호
     public static final int FLAG = 17465;
 
-    private void setNotification(String cmd){
+    private void setNotification(String cmd) {
         // 포어그라운드 서비스에서 보여질 노티바 만들기
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.mipmap.ic_launcher) //최상단 스테이터스 바에 나타나는 아이콘
@@ -91,6 +96,7 @@ public class MyService extends Service {
         Intent pauseIntent = new Intent(getBaseContext(), MyService.class);
         pauseIntent.setAction(cmd); // <- intent.getAction에서 취하는 명령어
         PendingIntent pendingIntent = PendingIntent.getService(getBaseContext(), 1, pauseIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                                                    // 만약 component자체가 activiy면 getActivity로 할 수 있음.
         // PendingIntent 생성시 마지막에 들어가는 Flag 값
         /* 출처 : http://aroundck.tistory.com/2134
         FLAG_CANCEL_CURRENT : 이전에 생성한 PendingIntent 는 취소하고 새롭게 만든다.
@@ -101,7 +107,7 @@ public class MyService extends Service {
 
         // 노티피케이션에 들어가는 버튼을 만드는 명령
         int iconId = android.R.drawable.ic_media_pause;
-        if(cmd.equals("START"))
+        if (cmd.equals("START"))
             iconId = android.R.drawable.ic_media_play;
         String btnTitle = cmd;
 
@@ -110,13 +116,14 @@ public class MyService extends Service {
         builder.addAction(pauseAction);
 
         Notification notification = builder.build();
-        startForeground(FLAG, notification);
+        startForeground(FLAG, notification);// 안드로이드의 메모리 관리 정책에 의해 서비스는 도중에 종료될 수 있습니다. 이를 방지하기 위해서는 서비스가 foreground에서 실행
+
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("MyService","========onCreate()");
+        Log.d("MyService", "========onCreate()");
     }
 
     @Override
@@ -125,6 +132,6 @@ public class MyService extends Service {
         stopForeground(true); // 포그라운드 상태에서 해제된다. 서비스는 유지
 
         super.onDestroy();
-        Log.d("MyService","========onDestroy()");
+        Log.d("MyService", "========onDestroy()");
     }
 }
