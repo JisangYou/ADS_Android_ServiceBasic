@@ -3,6 +3,7 @@
 ## 수업 내용
 
 - service를 학습
+- notification 학습
 
 ## Code Review
 
